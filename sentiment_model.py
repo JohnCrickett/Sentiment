@@ -1,4 +1,5 @@
 import string
+import time
 
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
@@ -22,6 +23,9 @@ def remove_stop_words(text):
     words = [porter.stem(item.lower()) for item in text.split()
              if item not in stop]
     return ' '.join(words)
+
+
+start_time = time.time()
 
 #load the data
 data = pd.read_csv('./data/training_data.csv', encoding='latin1')
@@ -65,5 +69,7 @@ test_predictions = model.predict(test_X)
 
 accuracy = accuracy_score(test_Y, test_predictions) * 100
 print("Fully Trained Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
+
+print("%f seconds" % (time.time() - start_time))
 
 
