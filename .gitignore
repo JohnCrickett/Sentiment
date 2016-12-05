@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#PyCharm project Settings
+.idea
+
+# Data Directory
+data/
