@@ -19,7 +19,8 @@ def determine_sentiment(delta):
 def remove_stop_words(text):
     global stop
     global porter
-    words = [porter.stem(item.lower()) for item in text.split() if item not in stop]
+    words = [porter.stem(item.lower()) for item in text.split()
+             if item not in stop]
     return ' '.join(words)
 
 #load the data
@@ -33,28 +34,26 @@ porter = PorterStemmer()
 data['text'] = data['text'].apply(remove_stop_words)
 
 data['price_delta'] = data['close_31'] - data['open_31']
-data['price_delta_percent'] = ((data['close_31'] - data['open_31']) / data['open_31']) * 100
+data['price_delta_percent'] = \
+    ((data['close_31'] - data['open_31']) / data['open_31']) * 100
 
 
-# print(data['price_delta_percent'].describe())
-
-# print(data.loc[(data['price_delta_percent'] >= 2) | (data['price_delta_percent'] <= -2)])
-
-sentiment_data = data[(data['price_delta_percent'] >= 2) | (data['price_delta_percent'] <= -2)]
+sentiment_data = data[(data['price_delta_percent'] >= 2) |
+                      (data['price_delta_percent'] <= -2)]
 
 
-data['sentiment'] = data['price_delta_percent'].apply(determine_sentiment)
+sentiment_data['sentiment'] = sentiment_data['price_delta_percent'].apply(determine_sentiment)
 
 count_vect = CountVectorizer()
 # data['word_counts'] = count_vect.fit_transform(data['text'].values)
-counts = count_vect.fit_transform(data['text'].values)
+counts = count_vect.fit_transform(sentiment_data['text'].values)
 
 # create the train / test split
 train_X, test_X = model_selection.train_test_split(counts,
                                                    train_size=0.7,
                                                    random_state=0)
 
-train_Y, test_Y = model_selection.train_test_split(data['sentiment'],
+train_Y, test_Y = model_selection.train_test_split(sentiment_data['sentiment'],
                                                    train_size=0.7,
                                                    random_state=0)
 
