@@ -36,25 +36,21 @@ data = pd.read_csv('./data/training_data.csv', encoding='latin1')
 
 # sentiment feature generation
 data['text'] = data['article_content'].apply(remove_punctuation)
+
 stop = set(stopwords.words('english'))
 porter = PorterStemmer()
 data['text'] = data['text'].apply(remove_stop_words)
 
+# generate price delta and labels
 data['price_delta'] = data['close_31'] - data['open_31']
 data['price_delta_percent'] = \
     ((data['close_31'] - data['open_31']) / data['open_31']) * 100
 
-
 sentiment_data = data[(data['price_delta_percent'] >= 2) |
-                      (data['price_delta_percent'] <= -2)]
-
+                      (data['price_delta_percent'] <= -2)].copy()
 
 sentiment_data['sentiment'] = \
     sentiment_data['price_delta_percent'].apply(determine_sentiment)
-
-# count_vectorizer = CountVectorizer()
-# counts = count_vectorizer.fit_transform(sentiment_data['text'].values)
-# transformer = TfidfTransformer(smooth_idf=False)
 
 # create the train / test split
 train_X, test_X = \
@@ -65,8 +61,6 @@ train_X, test_X = \
 train_Y, test_Y = model_selection.train_test_split(sentiment_data['sentiment'],
                                                    train_size=0.7,
                                                    random_state=0)
-
-# model = MultinomialNB().fit(train_X, train_Y)
 
 pipeline = Pipeline([('count_vectorizer',   CountVectorizer()),
                      ('tfidf_transformer',  TfidfTransformer()),
