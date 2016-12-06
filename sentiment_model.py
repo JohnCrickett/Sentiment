@@ -6,8 +6,11 @@ from nltk.stem.porter import PorterStemmer
 import pandas as pd
 from sklearn import model_selection
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics import accuracy_score
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+
 
 def remove_punctuation(text):
     return text.translate(str.maketrans('', '', string.punctuation))
@@ -27,9 +30,9 @@ def remove_stop_words(text):
 
 start_time = time.time()
 
-#load the data
+# load the data
 data = pd.read_csv('./data/training_data.csv', encoding='latin1')
-#data = pd.read_csv('./data/first10k.csv', encoding='latin1')
+# data = pd.read_csv('./data/first10k.csv', encoding='latin1')
 
 # sentiment feature generation
 data['text'] = data['article_content'].apply(remove_punctuation)
@@ -46,30 +49,34 @@ sentiment_data = data[(data['price_delta_percent'] >= 2) |
                       (data['price_delta_percent'] <= -2)]
 
 
-sentiment_data['sentiment'] = sentiment_data['price_delta_percent'].apply(determine_sentiment)
+sentiment_data['sentiment'] = \
+    sentiment_data['price_delta_percent'].apply(determine_sentiment)
 
-count_vect = CountVectorizer()
-# data['word_counts'] = count_vect.fit_transform(data['text'].values)
-counts = count_vect.fit_transform(sentiment_data['text'].values)
+# count_vectorizer = CountVectorizer()
+# counts = count_vectorizer.fit_transform(sentiment_data['text'].values)
+# transformer = TfidfTransformer(smooth_idf=False)
 
 # create the train / test split
-train_X, test_X = model_selection.train_test_split(counts,
-                                                   train_size=0.7,
-                                                   random_state=0)
+train_X, test_X = \
+    model_selection.train_test_split(sentiment_data['article_content'],
+                                     train_size=0.7,
+                                     random_state=0)
 
 train_Y, test_Y = model_selection.train_test_split(sentiment_data['sentiment'],
                                                    train_size=0.7,
                                                    random_state=0)
 
-model = MultinomialNB().fit(train_X, train_Y)
+# model = MultinomialNB().fit(train_X, train_Y)
 
+pipeline = Pipeline([('count_vectorizer',   CountVectorizer()),
+                     ('tfidf_transformer',  TfidfTransformer()),
+                     ('classifier',         MultinomialNB())])
 
+pipeline.fit(train_X, train_Y)
 
-test_predictions = model.predict(test_X)
+test_predictions = pipeline.predict(test_X)
 
 accuracy = accuracy_score(test_Y, test_predictions) * 100
 print("Fully Trained Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
 
 print("%f seconds" % (time.time() - start_time))
-
-
