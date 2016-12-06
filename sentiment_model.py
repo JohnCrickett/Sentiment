@@ -62,9 +62,9 @@ train_Y, test_Y = model_selection.train_test_split(sentiment_data['sentiment'],
                                                    train_size=0.7,
                                                    random_state=0)
 
-pipeline = Pipeline([('count_vectorizer',   CountVectorizer()),
-                     ('tfidf_transformer',  TfidfTransformer()),
-                     ('classifier',         MultinomialNB())])
+pipeline = Pipeline([('count_vectorizer', CountVectorizer(ngram_range=(1, 3))),
+                     ('tfidf_transformer', TfidfTransformer()),
+                     ('classifier', MultinomialNB())])
 
 pipeline.fit(train_X, train_Y)
 
