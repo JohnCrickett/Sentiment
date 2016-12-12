@@ -46,19 +46,16 @@ data['price_delta'] = data['high_31'] - data['open_31']
 data['price_delta_percent'] = \
     ((data['high_31'] - data['open_31']) / data['open_31']) * 100
 
-sentiment_data = data[(data['price_delta_percent'] >= 2) |
-                      (data['price_delta_percent'] <= -2)].copy()
-
-sentiment_data['sentiment'] = \
-    sentiment_data['price_delta_percent'].apply(determine_sentiment)
+# if we're using high then we can only predict positive
+data['sentiment'] = data['price_delta_percent'].apply(determine_sentiment)
 
 # create the train / test split
 train_X, test_X = \
-    model_selection.train_test_split(sentiment_data['article_content'],
+    model_selection.train_test_split(data['article_content'],
                                      train_size=0.7,
                                      random_state=0)
 
-train_Y, test_Y = model_selection.train_test_split(sentiment_data['sentiment'],
+train_Y, test_Y = model_selection.train_test_split(data['sentiment'],
                                                    train_size=0.7,
                                                    random_state=0)
 
