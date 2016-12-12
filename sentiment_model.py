@@ -42,9 +42,9 @@ porter = PorterStemmer()
 data['text'] = data['text'].apply(remove_stop_words)
 
 # generate price delta and labels
-data['price_delta'] = data['close_31'] - data['open_31']
+data['price_delta'] = data['high_31'] - data['open_31']
 data['price_delta_percent'] = \
-    ((data['close_31'] - data['open_31']) / data['open_31']) * 100
+    ((data['high_31'] - data['open_31']) / data['open_31']) * 100
 
 sentiment_data = data[(data['price_delta_percent'] >= 2) |
                       (data['price_delta_percent'] <= -2)].copy()
