@@ -43,6 +43,10 @@ data = pd.read_csv('./data/training_data.csv', encoding='latin1')
 # drop any invalid rows, if the data is incomplete
 data.dropna(inplace=True)
 
+# if we only keep a few categories we want:
+data = data.query('cat_id not in [40, 41, 42, 43, 98, 168]')
+
+
 # sentiment feature generation
 data['text'] = data['article_content'].apply(remove_punctuation)
 stop = set(stopwords.words('english'))
