@@ -13,10 +13,12 @@ from sklearn.pipeline import Pipeline
 
 
 def remove_punctuation(text):
+    """Removes punctuation from the supplied string"""
     return text.translate(str.maketrans('', '', string.punctuation))
 
 
 def determine_sentiment(delta):
+    """Returns 1 for positive sentiment, 0 otherwise"""
     if delta > 0:
         return 1
     else:
@@ -24,6 +26,7 @@ def determine_sentiment(delta):
 
 
 def remove_stop_words(text):
+    """Removes stop words from the supplied text whilst stemming them"""
     global stop
     global porter
     words = [porter.stem(item.lower()) for item in text.split()
@@ -34,8 +37,11 @@ def remove_stop_words(text):
 start_time = time.time()
 
 # load the data
-#data = pd.read_csv('./data/training_data.csv', encoding='latin1')
-data = pd.read_csv('./data/first10k.csv', encoding='latin1')
+data = pd.read_csv('./data/training_data.csv', encoding='latin1')
+#data = pd.read_csv('./data/first10k.csv', encoding='latin1')
+
+# drop any invalid rows, if the data is incomplete
+data.dropna(inplace=True)
 
 # sentiment feature generation
 data['text'] = data['article_content'].apply(remove_punctuation)
