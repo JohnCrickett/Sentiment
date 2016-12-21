@@ -17,7 +17,10 @@ def remove_punctuation(text):
 
 
 def determine_sentiment(delta):
-    return delta > 0
+    if delta > 0:
+        return 1
+    else:
+        return 0
 
 
 def remove_stop_words(text):
@@ -31,12 +34,11 @@ def remove_stop_words(text):
 start_time = time.time()
 
 # load the data
-data = pd.read_csv('./data/training_data.csv', encoding='latin1')
-# data = pd.read_csv('./data/first10k.csv', encoding='latin1')
+#data = pd.read_csv('./data/training_data.csv', encoding='latin1')
+data = pd.read_csv('./data/first10k.csv', encoding='latin1')
 
 # sentiment feature generation
 data['text'] = data['article_content'].apply(remove_punctuation)
-
 stop = set(stopwords.words('english'))
 porter = PorterStemmer()
 data['text'] = data['text'].apply(remove_stop_words)
@@ -46,19 +48,16 @@ data['price_delta'] = data['close_31'] - data['open_31']
 data['price_delta_percent'] = \
     ((data['close_31'] - data['open_31']) / data['open_31']) * 100
 
-sentiment_data = data[(data['price_delta_percent'] >= 2) |
-                      (data['price_delta_percent'] <= -2)].copy()
-
-sentiment_data['sentiment'] = \
-    sentiment_data['price_delta_percent'].apply(determine_sentiment)
+data['sentiment'] = \
+    data['price_delta_percent'].apply(determine_sentiment)
 
 # create the train / test split
 train_X, test_X = \
-    model_selection.train_test_split(sentiment_data['article_content'],
+    model_selection.train_test_split(data['article_content'],
                                      train_size=0.7,
                                      random_state=0)
 
-train_Y, test_Y = model_selection.train_test_split(sentiment_data['sentiment'],
+train_Y, test_Y = model_selection.train_test_split(data['sentiment'],
                                                    train_size=0.7,
                                                    random_state=0)
 
