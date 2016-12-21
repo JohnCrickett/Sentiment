@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 import pandas as pd
 from sklearn import model_selection
+from sklearn.externals import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics import accuracy_score
@@ -37,15 +38,14 @@ def remove_stop_words(text):
 start_time = time.time()
 
 # load the data
-data = pd.read_csv('./data/training_data.csv', encoding='latin1')
-#data = pd.read_csv('./data/first10k.csv', encoding='latin1')
+#data = pd.read_csv('./data/training_data.csv', encoding='latin1')
+data = pd.read_csv('./data/first10k.csv', encoding='latin1')
 
 # drop any invalid rows, if the data is incomplete
 data.dropna(inplace=True)
 
 # if we only keep a few categories we want:
 data = data.query('cat_id not in [40, 41, 42, 43, 98, 168]')
-
 
 # sentiment feature generation
 data['text'] = data['article_content'].apply(remove_punctuation)
@@ -83,3 +83,7 @@ accuracy = accuracy_score(test_Y, test_predictions) * 100
 print("Fully Trained Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
 
 print("%f seconds" % (time.time() - start_time))
+
+# save the model to disk
+filename = 'sentiment_model.model'
+joblib.dump(pipeline, filename)
