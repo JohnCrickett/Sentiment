@@ -19,8 +19,7 @@ def determine_sentiment(delta):
         return 0
 
 
-
-def train_and_save_model(data_filename, model_filename):
+def load_data(data_filename):
     pd.options.mode.chained_assignment = None
     # load the data
     # data = pd.read_csv('./data/training_data.csv', encoding='latin1')
@@ -45,6 +44,10 @@ def train_and_save_model(data_filename, model_filename):
     data['sentiment'] = \
         data['price_delta_percent'].apply(determine_sentiment)
 
+    return data
+
+
+def train_and_save_model(data, model_filename):
     # create the train / test split
     train_X, test_X = \
         model_selection.train_test_split(data['article_content'],
@@ -73,9 +76,18 @@ def train_and_save_model(data_filename, model_filename):
     pd.options.mode.chained_assignment = 'warn'
 
 
-def load_model():
-    pass
+def load_model(model_filename):
+    model = joblib.load(model_filename)
+    return model
 
 
-def predict():
-    pass
+def predict(model, article):
+    return model.predict(article)
+
+
+def check_model(model, data):
+    test_predictions = model.predict(data['article_content'])
+
+    accuracy = accuracy_score(data['sentiment'], test_predictions) * 100
+    print("Imported Model Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
+

@@ -2,7 +2,8 @@ import argparse
 import sys
 import time
 
-from modelling import train_and_save_model
+from modelling import check_model, load_data, load_model, predict, \
+    train_and_save_model
 
 
 def get_arguments():
@@ -15,6 +16,9 @@ def get_arguments():
                         default=False, dest='predict')
     parser.add_argument('-m', '--model', action='store', dest='model')
     parser.add_argument('--article', action='store', dest='article')
+    parser.add_argument('-v', '--verbose', action='store_true', dest='verbose')
+    parser.add_argument('-c', '--check',
+                        action='store_true', dest='check_model')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -30,7 +34,8 @@ def main():
     if args.train:
         if args.data is not None:
             if args.model is not None:
-                train_and_save_model(args.data, args.model)
+                data = load_data(args.data)
+                train_and_save_model(data, args.model)
                 print("%f seconds" % (time.time() - start_time))
                 exit(0)
             else:
@@ -49,8 +54,16 @@ def main():
                 print('Please provide an article to predict')
         else:
             print('Please provide a model to use for prediction')
+    elif args.check_model:
+        if args.data is not None:
+            model = load_model(args.model)
+            data = load_data(args.data)
+            check_model(model, data)
+        else:
+            print('Please provide the data to check against')
+            exit(-1)
     else:
-        print('Error: please set either model or predict flags')
+        print('Error: please set either model, predict or check flags')
     exit(-1)
 
 
