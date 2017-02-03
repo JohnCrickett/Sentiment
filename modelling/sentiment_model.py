@@ -3,9 +3,10 @@ from sklearn.externals import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics import accuracy_score
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
+import numpy as np
 import pandas as pd
 
 from modelling.utils import remove_punctuation, remove_stop_words
@@ -20,10 +21,9 @@ def determine_sentiment(delta):
 
 
 def load_data(data_filename):
+    # disable copy warnings from Pandas
     pd.options.mode.chained_assignment = None
-    # load the data
-    # data = pd.read_csv('./data/training_data.csv', encoding='latin1')
-    # data = pd.read_csv('./data/first10k.csv', encoding='latin1')
+
     data = pd.read_csv(data_filename, encoding='latin1')
 
     # drop any invalid rows, if the data is incomplete
@@ -61,7 +61,7 @@ def train_and_save_model(data, model_filename):
     pipeline = Pipeline([('count_vectorizer', CountVectorizer(ngram_range=(1,
                                                                            3))),
                          ('tfidf_transformer', TfidfTransformer()),
-                         ('classifier', MultinomialNB())])
+                         ('classifier', LogisticRegression())])
 
     pipeline.fit(train_X, train_Y)
 
@@ -69,6 +69,9 @@ def train_and_save_model(data, model_filename):
 
     accuracy = accuracy_score(test_Y, test_predictions) * 100
     print("Fully Trained Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
+
+    np.set_printoptions(threshold=np.inf)
+    print(test_predictions)
 
     print('Saving model to {file}'.format(file=model_filename))
     joblib.dump(pipeline, model_filename)
@@ -81,13 +84,14 @@ def load_model(model_filename):
     return model
 
 
-def predict(model, article):
-    return model.predict(article)
+def predict(model, text):
+    df = pd.DataFrame(data=[{'article': text}])
+    return model.predict_proba(df['article'])[0]
 
 
 def check_model(model, data):
     test_predictions = model.predict(data['article_content'])
 
     accuracy = accuracy_score(data['sentiment'], test_predictions) * 100
-    print("Imported Model Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
+    print("Restored Model Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
 

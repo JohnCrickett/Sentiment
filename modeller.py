@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 import time
 
@@ -15,7 +16,7 @@ def get_arguments():
     parser.add_argument('-p', '--predict', action='store_true',
                         default=False, dest='predict')
     parser.add_argument('-m', '--model', action='store', dest='model')
-    parser.add_argument('--article', action='store', dest='article')
+    parser.add_argument('-a', '--article', action='store', dest='article')
     parser.add_argument('-v', '--verbose', action='store_true', dest='verbose')
     parser.add_argument('-c', '--check',
                         action='store_true', dest='check_model')
@@ -47,13 +48,20 @@ def main():
         if args.model is not None:
             if args.article is not None:
                 model = load_model(args.model)
-                prediction = predict(model, article)
-                print('Prediction: {p}'.format(p=prediction))
+                with open(args.article, 'r') as f:
+                    article = json.loads(f.read())
+                article_text = article['article_text']
+                del article['article_text']
+                prediction = predict(model, article_text)
+                article['negative_score'] = prediction[0]
+                article['positive_score'] = prediction[1]
+                print(json.dumps(article))
                 exit(0)
             else:
                 print('Please provide an article to predict')
         else:
-            print('Please provide a model to use for prediction')
+            print('Please provide a model to use f'
+                  'or prediction')
     elif args.check_model:
         if args.data is not None:
             model = load_model(args.model)
