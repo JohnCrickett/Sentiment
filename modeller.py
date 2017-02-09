@@ -4,7 +4,7 @@ import sys
 import time
 
 from modelling import check_model, load_data, load_model, predict, \
-    train_and_save_model
+    save_model, train_model
 
 
 def get_arguments():
@@ -36,7 +36,8 @@ def main():
         if args.data is not None:
             if args.model is not None:
                 data = load_data(args.data)
-                train_and_save_model(data, args.model)
+                model = train_model(data)
+                save_model(model, args.model)
                 print("%f seconds" % (time.time() - start_time))
                 exit(0)
             else:

@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
 import numpy as np
@@ -30,7 +31,7 @@ def load_data(data_filename):
     data.dropna(inplace=True)
 
     # if we only keep a few categories we want:
-    data = data.query('cat_id not in [40, 41, 42, 43, 98, 168]')
+    data = data.query('cat_id not in [39, 40, 41, 42, 43]')
 
     # sentiment feature generation
     data['text'] = data['article_content'].apply(remove_punctuation)
@@ -47,7 +48,7 @@ def load_data(data_filename):
     return data
 
 
-def train_and_save_model(data, model_filename):
+def train_model(data):
     # create the train / test split
     train_X, test_X = \
         model_selection.train_test_split(data['article_content'],
@@ -61,7 +62,7 @@ def train_and_save_model(data, model_filename):
     pipeline = Pipeline([('count_vectorizer', CountVectorizer(ngram_range=(1,
                                                                            3))),
                          ('tfidf_transformer', TfidfTransformer()),
-                         ('classifier', LogisticRegression())])
+                         ('classifier', MultinomialNB())])
 
     pipeline.fit(train_X, train_Y)
 
@@ -70,13 +71,15 @@ def train_and_save_model(data, model_filename):
     accuracy = accuracy_score(test_Y, test_predictions) * 100
     print("Fully Trained Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
 
-    np.set_printoptions(threshold=np.inf)
-    print(test_predictions)
-
-    print('Saving model to {file}'.format(file=model_filename))
-    joblib.dump(pipeline, model_filename)
+    # print('Saving model to {file}'.format(file=model_filename))
+    # joblib.dump(pipeline, model_filename)
 
     pd.options.mode.chained_assignment = 'warn'
+    return pipeline
+
+
+def save_model(model, model_filename):
+    joblib.dump(model, model_filename)
 
 
 def load_model(model_filename):
