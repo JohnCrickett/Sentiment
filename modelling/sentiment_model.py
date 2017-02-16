@@ -31,7 +31,7 @@ def load_data(data_filename):
     data.dropna(inplace=True)
 
     # if we only keep a few categories we want:
-    data = data.query('cat_id not in [39, 40, 41, 42, 43]')
+    #data = data.query('cat_id not in [39, 40, 41, 42, 43]')
 
     # sentiment feature generation
     data['text'] = data['article_content'].apply(remove_punctuation)
@@ -59,6 +59,8 @@ def train_model(data):
                                                        train_size=0.7,
                                                        random_state=0)
 
+    # TODO wrap all this in a grid search then retrain on the best
+    # meta parameters
     pipeline = Pipeline([('count_vectorizer', CountVectorizer(ngram_range=(1,
                                                                            3))),
                          ('tfidf_transformer', TfidfTransformer()),
