@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics import accuracy_score
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
 import pandas as pd
@@ -59,7 +60,8 @@ def train_model(data):
     pipeline = Pipeline([('count_vectorizer', CountVectorizer(ngram_range=(1,
                                                                            1))),
                          ('tfidf_transformer', TfidfTransformer()),
-                         ('classifier', MultinomialNB())])
+#                         ('classifier', MultinomialNB())])
+                         ('classifier', LogisticRegression())])
 
     pipeline.fit(train_X, train_Y)
 
@@ -91,4 +93,7 @@ def check_model(model, data):
 
     accuracy = accuracy_score(data['sentiment'], test_predictions) * 100
     print("Restored Model Accuracy: {accuracy:.3f}".format(accuracy=accuracy))
+
+    data['predictions'] = test_predictions
+    data.to_csv('./data/td_with_predict.csv')
 
