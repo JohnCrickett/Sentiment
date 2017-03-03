@@ -1,15 +1,13 @@
 import json
-import os
 from threading import Thread
 
-from flask import abort, Flask, jsonify, render_template, \
-                  request, Response, make_response
+from flask import abort, Flask, request
 
 import modelling
 
 
-MODEL_NAME = "10k.model"  # Replace this with you model filename
-DATA_FILE = "data/first10k.csv"  # Replace this with your data filename
+MODEL_NAME = "all.model"  # Replace this with you model filename
+DATA_FILE = "data/training_data.csv"  # Replace this with your data filename
 
 app = Flask(__name__)
 _model = modelling.load_model(MODEL_NAME)
