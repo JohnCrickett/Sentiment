@@ -3,8 +3,7 @@ from sklearn.externals import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics import accuracy_score
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.pipeline import Pipeline
 
 import pandas as pd
@@ -34,9 +33,12 @@ def load_data(data_filename):
     data['text'] = data['text'].apply(remove_stop_words)
 
     # generate price delta and labels
-    data['price_delta'] = data['close_31'] - data['open_31']
+    # data['price_delta'] = data['close_31'] - data['open_31']
+    # data['price_delta_percent'] = \
+    #     ((data['close_31'] - data['open_31']) / data['open_31']) * 100
+    data['price_delta'] = data['close_31'] - data['close_30']
     data['price_delta_percent'] = \
-        ((data['close_31'] - data['open_31']) / data['open_31']) * 100
+        ((data['close_31'] - data['close_30']) / data['close_30']) * 100
 
     data['sentiment'] = \
         data['price_delta_percent'].apply(determine_sentiment)
@@ -60,8 +62,11 @@ def train_model(data):
     pipeline = Pipeline([('count_vectorizer', CountVectorizer(ngram_range=(1,
                                                                            1))),
                          ('tfidf_transformer', TfidfTransformer()),
-#                         ('classifier', MultinomialNB())])
-                         ('classifier', LogisticRegression())])
+                         ('classifier', LogisticRegressionCV(n_jobs=-1,
+                                                             solver='sag',
+                                                             Cs=[10, 1, 0.1,
+                                                                 0.01, 0.001],
+                                                             max_iter=10000))])
 
     pipeline.fit(train_X, train_Y)
 
